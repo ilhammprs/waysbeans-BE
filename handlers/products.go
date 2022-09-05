@@ -1,19 +1,14 @@
 package handlers
 
 import (
-	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
-	"os"
 	"strconv"
 	productdto "waysbean/dto/product"
 	dto "waysbean/dto/result"
 	"waysbean/models"
 	"waysbean/repositories"
 
-	"github.com/cloudinary/cloudinary-go/v2"
-	"github.com/cloudinary/cloudinary-go/v2/api/uploader"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/gorilla/mux"
 )
@@ -83,28 +78,13 @@ func (h *handlersProduct) CreateProduct(w http.ResponseWriter, r *http.Request) 
 		Desc:  r.FormValue("desc"),
 		Stock: stock,
 	}
-	// Declare Context Background, Cloud Name, API Key, API Secret ...
-	var ctx = context.Background()
-	var CLOUD_NAME = os.Getenv("CLOUD_NAME")
-	var API_KEY = os.Getenv("API_KEY")
-	var API_SECRET = os.Getenv("API_SECRET")
-
-	// Add your Cloudinary credentials ...
-	cld, _ := cloudinary.NewFromParams(CLOUD_NAME, API_KEY, API_SECRET)
-
-	// Upload file to Cloudinary ...
-	resp, err := cld.Upload.Upload(ctx, filename, uploader.UploadParams{Folder: "waysbeans"})
-
-	if err != nil {
-		fmt.Println(err.Error())
-	}
 
 	product := models.Product{
 		Title:  request.Title,
 		Price:  request.Price,
 		Desc:   request.Desc,
 		Stock:  request.Stock,
-		Image:  resp.SecureURL,
+		Image:  filename,
 		UserID: userId,
 	}
 
@@ -144,17 +124,6 @@ func (h *handlersProduct) UpdateProduct(w http.ResponseWriter, r *http.Request) 
 		json.NewEncoder(w).Encode(response)
 	}
 
-	var ctx = context.Background()
-	var CLOUD_NAME = os.Getenv("CLOUD_NAME")
-	var API_KEY = os.Getenv("API_KEY")
-	var API_SECRET = os.Getenv("API_SECRET")
-
-	// Add your Cloudinary credentials ...
-	cld, _ := cloudinary.NewFromParams(CLOUD_NAME, API_KEY, API_SECRET)
-
-	// Upload file to Cloudinary ...
-	resp, err := cld.Upload.Upload(ctx, filename, uploader.UploadParams{Folder: "waysbeans"})
-
 	// len > 0
 	if (request.Title) != "" {
 		product.Title = request.Title
@@ -173,7 +142,7 @@ func (h *handlersProduct) UpdateProduct(w http.ResponseWriter, r *http.Request) 
 	}
 
 	if filename != "false" {
-		product.Image = resp.SecureURL
+		product.Image = filename
 	}
 
 	data, err := h.ProductRepository.UpdateProduct(product)

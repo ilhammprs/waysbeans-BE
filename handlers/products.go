@@ -38,6 +38,10 @@ func (h *handlersProduct) FindProducts(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(response)
 	}
 
+	for i, p := range products {
+		products[i].Image = path_file_product + p.Image
+	}
+
 	w.WriteHeader(http.StatusOK)
 	response := dto.SuccessResult{Code: "Success", Data: products}
 	json.NewEncoder(w).Encode(response)
@@ -55,6 +59,8 @@ func (h *handlersProduct) GetProduct(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(response)
 	}
 
+	product.Image = path_file_product + product.Image
+
 	w.WriteHeader(http.StatusOK)
 	response := dto.SuccessResult{Code: "Success", Data: product}
 	json.NewEncoder(w).Encode(response)
@@ -67,7 +73,7 @@ func (h *handlersProduct) CreateProduct(w http.ResponseWriter, r *http.Request) 
 	userId := int(userInfo["time"].(float64))
 
 	dataContex := r.Context().Value("dataFile")
-    filepath := dataContex.(string)
+	filename := dataContex.(string)
 
 	price, _ := strconv.Atoi(r.FormValue("price"))
 	stock, _ := strconv.Atoi(r.FormValue("stock"))
@@ -87,7 +93,7 @@ func (h *handlersProduct) CreateProduct(w http.ResponseWriter, r *http.Request) 
 	cld, _ := cloudinary.NewFromParams(CLOUD_NAME, API_KEY, API_SECRET)
 
 	// Upload file to Cloudinary ...
-	resp, err := cld.Upload.Upload(ctx, filepath, uploader.UploadParams{Folder: "waysbeans"})
+	resp, err := cld.Upload.Upload(ctx, filename, uploader.UploadParams{Folder: "waysbeans"})
 
 	if err != nil {
 		fmt.Println(err.Error())
@@ -147,7 +153,7 @@ func (h *handlersProduct) UpdateProduct(w http.ResponseWriter, r *http.Request) 
 	cld, _ := cloudinary.NewFromParams(CLOUD_NAME, API_KEY, API_SECRET)
 
 	// Upload file to Cloudinary ...
-	resp, err := cld.Upload.Upload(ctx, filepath, uploader.UploadParams{Folder: "waysbeans"})
+	resp, err := cld.Upload.Upload(ctx, filename, uploader.UploadParams{Folder: "waysbeans"})
 
 	// len > 0
 	if (request.Title) != "" {

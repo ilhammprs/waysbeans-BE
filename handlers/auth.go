@@ -136,7 +136,6 @@ func (h *handlersAuth) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	createOrder := models.Transaction{
-		ID:     IdTrans,
 		UserID: user.ID,
 	}
 
